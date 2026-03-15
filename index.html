@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rawer — Plain Text Editor</title>
+    <meta name="description" content="A minimalist raw plain-text editor. Paste anything, get clean text.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">Files</span>
+                <div class="sidebar-actions">
+                    <button id="btn-sort" title="Sắp xếp: Thủ công">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 5h10" />
+                            <path d="M11 9h7" />
+                            <path d="M11 13h4" />
+                            <path d="M3 17l3 3 3-3" />
+                            <path d="M6 18V4" />
+                        </svg>
+                    </button>
+                    <button id="btn-new-file" title="Tạo file mới">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                            <path d="M14 2v6h6" />
+                            <line x1="12" y1="18" x2="12" y2="12" />
+                            <line x1="9" y1="15" x2="15" y2="15" />
+                        </svg>
+                    </button>
+                    <button id="btn-new-folder" title="Tạo folder mới">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 10v6" />
+                            <path d="M9 13h6" />
+                            <path
+                                d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+                        </svg>
+                    </button>
+                    <button id="btn-import" title="Import file">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-tree" id="file-tree"></div>
+            <div class="sidebar-footer" id="sidebar-footer">
+                <span id="sidebar-stats"></span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <div class="container">
+                <div class="top-bar">
+                    <div class="header">
+                        <div class="toolbar">
+                            <button id="btn-toggle-sidebar" title="Files (Ctrl+B)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                    <line x1="9" y1="3" x2="9" y2="21" />
+                                </svg>
+                            </button>
+                            <div class="toolbar-sep"></div>
+                            <button id="btn-undo" title="Hoàn tác (Ctrl+Z)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 7v6h6" />
+                                    <path d="M3 13a9 9 0 0 1 15.36-6.36L21 9" />
+                                </svg>
+                                <span class="label">Hoàn tác</span>
+                            </button>
+                            <button id="btn-redo" title="Làm lại (Ctrl+Y)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 7v6h-6" />
+                                    <path d="M21 13a9 9 0 0 0-15.36-6.36L3 9" />
+                                </svg>
+                                <span class="label">Làm lại</span>
+                            </button>
+                            <div class="toolbar-sep"></div>
+                            <button id="btn-copy" title="Sao chép">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                                <span class="label">Sao chép</span>
+                            </button>
+                            <button id="btn-paste" title="Dán">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                                    <rect x="8" y="2" width="8" height="4" rx="1" />
+                                </svg>
+                                <span class="label">Dán</span>
+                            </button>
+                            <button id="btn-find" title="Tìm & Thay thế (Ctrl+H)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.3-4.3" />
+                                </svg>
+                                <span class="label">Tìm</span>
+                            </button>
+                            <button id="btn-clear" title="Xóa tất cả">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                </svg>
+                                <span class="label">Xóa</span>
+                            </button>
+                            <div class="toolbar-sep"></div>
+                            <button id="btn-download" title="Tải xuống (Ctrl+S)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                <span class="label">Tải</span>
+                            </button>
+                            <button id="btn-show-spaces" title="Hiện khoảng trắng">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="6" cy="12" r="1.5" fill="currentColor" />
+                                    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                                    <circle cx="18" cy="12" r="1.5" fill="currentColor" />
+                                </svg>
+                                <span class="label">Spaces</span>
+                            </button>
+                            <div class="toolbar-sep"></div>
+                            <button id="btn-export-ws" title="Xuất workspace (JSON)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                <span class="label">Xuất</span>
+                            </button>
+                            <button id="btn-import-ws" title="Nhập workspace (JSON)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span class="label">Nhập</span>
+                            </button>
+                            <input type="file" id="import-ws-input" accept=".json" style="display:none">
+                            <button id="btn-reset" title="Đặt lại toàn bộ">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                    <path d="M3 3v5h5" />
+                                </svg>
+                                <span class="label">Reset</span>
+                            </button>
+                            <button id="btn-timer" title="Hẹn giờ">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                                <span class="label">Hẹn giờ</span>
+                            </button>
+                            <button id="btn-keyboard" title="Bàn phím ảo">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="4" width="20" height="14" rx="2" />
+                                    <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01" />
+                                    <path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01" />
+                                    <path d="M8 16h8" />
+                                </svg>
+                                <span class="label">Phím ảo</span>
+                            </button>
+                            <button id="btn-stats" title="Thống kê sử dụng">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 20V10" />
+                                    <path d="M18 20V4" />
+                                    <path d="M6 20v-4" />
+                                </svg>
+                                <span class="label">Thống kê</span>
+                            </button>
+                            <button id="btn-collapse" class="btn-collapse" title="Thu gọn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="find-replace" id="find-replace">
+                        <div class="find-row">
+                            <input type="text" id="find-input" placeholder="Tìm kiếm..." autocomplete="off"
+                                spellcheck="false">
+                            <button class="btn-find-toggle" id="btn-case" title="Phân biệt hoa/thường (Aa)">Aa</button>
+                            <button class="btn-find-toggle" id="btn-regex" title="Biểu thức chính quy (.*)">.*</button>
+                            <span class="match-count" id="match-count"></span>
+                            <button class="btn-find-nav" id="btn-find-prev" title="Trước (Shift+Enter)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="18 15 12 9 6 15" />
+                                </svg>
+                            </button>
+                            <button class="btn-find-nav" id="btn-find-next" title="Tiếp (Enter)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="replace-row">
+                            <input type="text" id="replace-input" placeholder="Thay thế bằng…" autocomplete="off"
+                                spellcheck="false">
+                            <button class="btn-replace btn-replace-outline" id="btn-replace-one">Thay thế</button>
+                            <button class="btn-replace" id="btn-replace-all">Tất cả</button>
+                            <button class="btn-close" id="btn-close-find" title="Đóng (Esc)">×</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="editor-wrap" id="editor-wrap">
+                    <div class="gutter" id="gutter" aria-hidden="true"></div>
+                    <div class="editor-inner">
+                        <div id="space-layer" aria-hidden="true"></div>
+                        <div id="highlight-layer" aria-hidden="true"></div>
+                        <textarea id="editor" placeholder="Nhập hoặc dán văn bản vào đây…" spellcheck="false"
+                            autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+                    </div>
+                    <div id="mirror" aria-hidden="true"></div>
+                    <div class="drop-hint" id="drop-hint">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round" width="32" height="32">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        <span>Kéo thả file hoặc folder vào đây</span>
+                    </div>
+                </div>
+                <div class="status-bar" id="status-bar">
+                    <div class="status-left">
+                        <span id="stat-save" class="status-save">Đã lưu</span>
+                        <span class="status-dot">·</span>
+                        <span id="stat-chars">0 ký tự</span>
+                        <span class="status-dot">·</span>
+                        <span id="stat-words">0 từ</span>
+                        <span class="status-dot">·</span>
+                        <span id="stat-lines">1 dòng</span>
+                    </div>
+                    <div class="status-right">
+                        <span id="stat-timer" class="status-timer" style="display:none"></span>
+                        <span id="stat-clock" class="status-clock"></span>
+                        <span id="stat-focus" class="status-focus">Editor</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="context-menu" id="context-menu">
+        <button data-action="rename">Đổi tên</button>
+        <button data-action="duplicate">Nhân bản</button>
+        <button data-action="download">Tải xuống</button>
+        <button data-action="delete">Xóa</button>
+        <div class="context-menu-sep"></div>
+        <button data-action="new-file">Tạo file mới</button>
+        <button data-action="new-folder">Tạo folder mới</button>
+    </div>
+
+    <div class="sort-menu" id="sort-menu">
+        <button data-sort="manual">Thủ công</button>
+        <button data-sort="name">Theo tên</button>
+        <button data-sort="modified">Ngày sửa đổi</button>
+        <button data-sort="created">Ngày tạo</button>
+    </div>
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <input type="file" id="import-input" multiple
+        accept=".txt,.md,.csv,.json,.xml,.html,.css,.js,.ts,.py,.java,.c,.cpp,.h,.log,.yml,.yaml,.toml,.ini,.cfg,.sh,.bat"
+        style="display:none">
+    <div class="toast-container" id="toast-container"></div>
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-dialog">
+            <div class="confirm-title">Đặt lại toàn bộ?</div>
+            <div class="confirm-stats" id="confirm-stats"></div>
+            <p class="confirm-desc">Hành động này không thể hoàn tác.</p>
+            <div class="confirm-actions">
+                <button id="confirm-cancel" class="confirm-btn confirm-btn-cancel">Hủy</button>
+                <button id="confirm-reset" class="confirm-btn confirm-btn-danger" disabled>Xác nhận (5)</button>
+            </div>
+        </div>
+    </div>
+    <div class="virtual-keyboard" id="virtual-keyboard">
+        <div class="vk-header">
+            <span>Bàn phím ảo</span>
+            <button id="vk-close" class="vk-close-btn">x</button>
+        </div>
+        <div class="vk-rows">
+            <div class="vk-row" data-keys="1 2 3 4 5 6 7 8 9 0 - ="></div>
+            <div class="vk-row" data-keys="q w e r t y u i o p [ ]"></div>
+            <div class="vk-row" data-keys="a s d f g h j k l ; '"></div>
+            <div class="vk-row">
+                <button class="vk-key vk-mod" data-action="shift">Shift</button>
+                <span data-keys="z x c v b n m , . /"></span>
+                <button class="vk-key vk-mod" data-action="backspace">Bksp</button>
+            </div>
+            <div class="vk-row vk-row-vn">
+                <button class="vk-key vk-vn-char" data-char="ă">ă</button>
+                <button class="vk-key vk-vn-char" data-char="â">â</button>
+                <button class="vk-key vk-vn-char" data-char="ê">ê</button>
+                <button class="vk-key vk-vn-char" data-char="ô">ô</button>
+                <button class="vk-key vk-vn-char" data-char="ơ">ơ</button>
+                <button class="vk-key vk-vn-char" data-char="ư">ư</button>
+                <button class="vk-key vk-vn-char" data-char="đ">đ</button>
+            </div>
+            <div class="vk-row vk-row-vn">
+                <button class="vk-key vk-vn" data-diacritic="s">Sắc ´</button>
+                <button class="vk-key vk-vn" data-diacritic="f">Huyền `</button>
+                <button class="vk-key vk-vn" data-diacritic="r">Hỏi ˀ</button>
+                <button class="vk-key vk-vn" data-diacritic="x">Ngã ˜</button>
+                <button class="vk-key vk-vn" data-diacritic="j">Nặng .</button>
+            </div>
+            <div class="vk-row">
+                <button class="vk-key vk-wide" data-action="tab">Tab</button>
+                <button class="vk-key vk-space" data-action="space">Space</button>
+                <button class="vk-key vk-wide" data-action="enter">Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirm-overlay stats-overlay" id="stats-overlay">
+        <div class="confirm-dialog stats-dialog">
+            <div class="confirm-title">Thống kê sử dụng</div>
+            <div class="stats-content" id="stats-content"></div>
+            <div class="confirm-actions">
+                <button id="stats-close" class="confirm-btn confirm-btn-cancel">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Setup Dialog -->
+    <div class="confirm-overlay" id="timer-overlay">
+        <div class="confirm-dialog timer-dialog">
+            <div class="confirm-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" width="18" height="18"
+                    style="vertical-align:-3px;margin-right:4px">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>Hẹn giờ</div>
+            <div class="timer-tabs">
+                <button class="timer-tab active" data-tab="countdown">Đếm ngược</button>
+                <button class="timer-tab" data-tab="alarm">Báo thức</button>
+            </div>
+            <div class="timer-tab-content" id="timer-tab-countdown">
+                <div class="timer-presets">
+                    <button class="timer-preset" data-minutes="5">5 phút</button>
+                    <button class="timer-preset" data-minutes="10">10 phút</button>
+                    <button class="timer-preset" data-minutes="15">15 phút</button>
+                    <button class="timer-preset" data-minutes="30">30 phút</button>
+                    <button class="timer-preset" data-minutes="60">1 giờ</button>
+                </div>
+                <div class="timer-custom">
+                    <label>Tùy chỉnh</label>
+                    <div class="timer-custom-row">
+                        <input type="number" id="timer-custom-min" min="1" max="999" placeholder="Phút"
+                            class="timer-input">
+                    </div>
+                </div>
+            </div>
+            <div class="timer-tab-content" id="timer-tab-alarm" style="display:none">
+                <div class="timer-presets">
+                    <button class="timer-alarm-preset" data-add-minutes="5">+5 phút</button>
+                    <button class="timer-alarm-preset" data-add-minutes="10">+10 phút</button>
+                    <button class="timer-alarm-preset" data-add-minutes="15">+15 phút</button>
+                    <button class="timer-alarm-preset" data-add-minutes="30">+30 phút</button>
+                </div>
+                <div class="timer-custom">
+                    <label>Chọn thời gian</label>
+                    <input type="time" id="timer-alarm-time" class="timer-input timer-input-time">
+                </div>
+            </div>
+            <div class="timer-options">
+                <label class="timer-toggle">
+                    <input type="checkbox" id="timer-opt-popup" checked>
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" width="14" height="14"
+                            style="vertical-align:-2px">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg> Popup</span>
+                </label>
+                <label class="timer-toggle">
+                    <input type="checkbox" id="timer-opt-sound">
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" width="14" height="14"
+                            style="vertical-align:-2px">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                        </svg> Âm thanh</span>
+                </label>
+                <label class="timer-toggle">
+                    <input type="checkbox" id="timer-opt-repeat">
+                    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" width="14" height="14"
+                            style="vertical-align:-2px">
+                            <polyline points="17 1 21 5 17 9" />
+                            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                            <polyline points="7 23 3 19 7 15" />
+                            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                        </svg> Lặp lại</span>
+                </label>
+            </div>
+            <div class="confirm-actions">
+                <button id="timer-cancel" class="confirm-btn confirm-btn-cancel">Hủy</button>
+                <button id="timer-start" class="confirm-btn timer-btn-start">Bắt đầu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Alarm Notification -->
+    <div class="confirm-overlay" id="timer-alarm-overlay">
+        <div class="confirm-dialog timer-alarm-dialog">
+            <div class="timer-alarm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg></div>
+            <div class="confirm-title timer-alarm-title">Hết giờ!</div>
+            <div class="timer-alarm-desc" id="timer-alarm-desc"></div>
+            <div class="confirm-actions">
+                <button id="timer-alarm-repeat" class="confirm-btn timer-btn-start" style="display:none"><svg
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" width="14" height="14" style="vertical-align:-2px">
+                        <polyline points="17 1 21 5 17 9" />
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                        <polyline points="7 23 3 19 7 15" />
+                        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                    </svg> Lặp lại</button>
+                <button id="timer-alarm-dismiss" class="confirm-btn confirm-btn-cancel">Tắt</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
