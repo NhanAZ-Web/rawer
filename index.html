@@ -71,6 +71,7 @@
                 <div class="top-bar">
                     <div class="header">
                         <div class="toolbar">
+                            <!-- Sidebar Toggle -->
                             <button id="btn-toggle-sidebar" title="Files (Ctrl+B)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -79,6 +80,7 @@
                                 </svg>
                             </button>
                             <div class="toolbar-sep"></div>
+                            <!-- Editing: Undo / Redo -->
                             <button id="btn-undo" title="Hoàn tác (Ctrl+Z)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -96,6 +98,7 @@
                                 <span class="label">Làm lại</span>
                             </button>
                             <div class="toolbar-sep"></div>
+                            <!-- Clipboard & Clear -->
                             <button id="btn-copy" title="Sao chép">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -113,14 +116,6 @@
                                 </svg>
                                 <span class="label">Dán</span>
                             </button>
-                            <button id="btn-find" title="Tìm & Thay thế (Ctrl+H)">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="8" />
-                                    <path d="m21 21-4.3-4.3" />
-                                </svg>
-                                <span class="label">Tìm</span>
-                            </button>
                             <button id="btn-clear" title="Xóa tất cả">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -131,14 +126,14 @@
                                 <span class="label">Xóa</span>
                             </button>
                             <div class="toolbar-sep"></div>
-                            <button id="btn-download" title="Tải xuống (Ctrl+S)">
+                            <!-- Find & View -->
+                            <button id="btn-find" title="Tìm & Thay thế (Ctrl+H)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                    <polyline points="7 10 12 15 17 10" />
-                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path d="m21 21-4.3-4.3" />
                                 </svg>
-                                <span class="label">Tải</span>
+                                <span class="label">Tìm</span>
                             </button>
                             <button id="btn-show-spaces" title="Hiện khoảng trắng">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -150,6 +145,16 @@
                                 <span class="label">Spaces</span>
                             </button>
                             <div class="toolbar-sep"></div>
+                            <!-- File Operations -->
+                            <button id="btn-download" title="Tải xuống (Ctrl+S)">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                                <span class="label">Tải</span>
+                            </button>
                             <button id="btn-export-ws" title="Xuất workspace (JSON)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -169,14 +174,8 @@
                                 <span class="label">Nhập</span>
                             </button>
                             <input type="file" id="import-ws-input" accept=".json" style="display:none">
-                            <button id="btn-reset" title="Đặt lại toàn bộ">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                    <path d="M3 3v5h5" />
-                                </svg>
-                                <span class="label">Reset</span>
-                            </button>
+                            <div class="toolbar-sep"></div>
+                            <!-- Utilities -->
                             <button id="btn-timer" title="Hẹn giờ">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -204,6 +203,15 @@
                                 </svg>
                                 <span class="label">Thống kê</span>
                             </button>
+                            <button id="btn-reset" title="Đặt lại toàn bộ">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                    <path d="M3 3v5h5" />
+                                </svg>
+                                <span class="label">Reset</span>
+                            </button>
+                            <!-- Collapse Toggle -->
                             <button id="btn-collapse" class="btn-collapse" title="Thu gọn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -436,6 +444,73 @@
             <div class="confirm-actions">
                 <button id="timer-cancel" class="confirm-btn confirm-btn-cancel">Hủy</button>
                 <button id="timer-start" class="confirm-btn timer-btn-start">Bắt đầu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Selection Dialog -->
+    <div class="confirm-overlay" id="export-overlay">
+        <div class="confirm-dialog export-dialog">
+            <div class="confirm-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" width="18" height="18"
+                    style="vertical-align:-3px;margin-right:4px">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>Xuất dữ liệu</div>
+            <div class="export-options">
+                <label class="export-select-all">
+                    <input type="checkbox" id="export-select-all" checked>
+                    <span>Chọn tất cả</span>
+                </label>
+                <div class="export-option-list">
+                    <label class="export-option">
+                        <input type="checkbox" class="export-check" data-key="workspace" checked>
+                        <span class="export-option-info">
+                            <span class="export-option-name">Workspace</span>
+                            <span class="export-option-desc">Cây thư mục, nội dung file, file đang mở</span>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="checkbox" class="export-check" data-key="sortMode" checked>
+                        <span class="export-option-info">
+                            <span class="export-option-name">Cài đặt sắp xếp</span>
+                            <span class="export-option-desc">Chế độ sắp xếp file (thủ công, tên, ngày...)</span>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="checkbox" class="export-check" data-key="sidebarOpen" checked>
+                        <span class="export-option-info">
+                            <span class="export-option-name">Trạng thái sidebar</span>
+                            <span class="export-option-desc">Sidebar đang mở hay đóng</span>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="checkbox" class="export-check" data-key="usage" checked>
+                        <span class="export-option-info">
+                            <span class="export-option-name">Thống kê sử dụng</span>
+                            <span class="export-option-desc">Số phiên, tổng thời gian, phím đã nhấn...</span>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="checkbox" class="export-check" data-key="timerPrefs" checked>
+                        <span class="export-option-info">
+                            <span class="export-option-name">Cài đặt hẹn giờ</span>
+                            <span class="export-option-desc">Popup, âm thanh, lặp lại</span>
+                        </span>
+                    </label>
+                    <label class="export-option">
+                        <input type="checkbox" class="export-check" data-key="toolbarCollapsed" checked>
+                        <span class="export-option-info">
+                            <span class="export-option-name">Thanh công cụ</span>
+                            <span class="export-option-desc">Trạng thái thu gọn/mở rộng toolbar</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            <div class="confirm-actions">
+                <button id="export-cancel" class="confirm-btn confirm-btn-cancel">Hủy</button>
+                <button id="export-confirm" class="confirm-btn timer-btn-start">Xuất</button>
             </div>
         </div>
     </div>

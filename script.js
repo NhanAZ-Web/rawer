@@ -1873,18 +1873,98 @@ editorWrap.addEventListener('drop', async (e) => {
 });
 
 // ── Export / Import Workspace ─────────────────
-document.getElementById('btn-export-ws').addEventListener('click', () => {
+const exportOverlay = document.getElementById('export-overlay');
+const exportSelectAll = document.getElementById('export-select-all');
+const exportChecks = exportOverlay.querySelectorAll('.export-check');
+
+// "Select All" toggle logic
+exportSelectAll.addEventListener('change', () => {
+    exportChecks.forEach(cb => cb.checked = exportSelectAll.checked);
+});
+
+// Keep "Select All" in sync with individual checkboxes
+exportChecks.forEach(cb => {
+    cb.addEventListener('change', () => {
+        exportSelectAll.checked = [...exportChecks].every(c => c.checked);
+    });
+});
+
+function showExportDialog() {
+    // Reset all checkboxes to checked
+    exportSelectAll.checked = true;
+    exportChecks.forEach(cb => cb.checked = true);
+    exportOverlay.classList.add('visible');
+}
+
+function hideExportDialog() {
+    exportOverlay.classList.remove('visible');
+}
+
+document.getElementById('btn-export-ws').addEventListener('click', showExportDialog);
+document.getElementById('export-cancel').addEventListener('click', hideExportDialog);
+exportOverlay.addEventListener('click', (e) => { if (e.target === exportOverlay) hideExportDialog(); });
+
+// Perform export based on selected options
+document.getElementById('export-confirm').addEventListener('click', () => {
+    hideExportDialog();
+
+    // Sync current editor content
     if (workspace.activeFileId && workspace.files[workspace.activeFileId] !== editor.value) {
         workspace.files[workspace.activeFileId] = editor.value;
     }
+
+    const selected = {};
+    exportChecks.forEach(cb => { selected[cb.dataset.key] = cb.checked; });
+
+    // Check if at least one option is selected
+    if (!Object.values(selected).some(v => v)) {
+        showToast('Vui lòng chọn ít nhất một mục để xuất');
+        return;
+    }
+
     const data = {
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        tree: workspace.tree,
-        files: workspace.files,
-        activeFileId: workspace.activeFileId,
-        sortMode: workspace.sortMode
+        version: 2,
+        exportedAt: new Date().toISOString()
     };
+
+    // Workspace (tree + files + activeFileId)
+    if (selected.workspace) {
+        data.tree = workspace.tree;
+        data.files = workspace.files;
+        data.activeFileId = workspace.activeFileId;
+    }
+
+    // Sort mode
+    if (selected.sortMode) {
+        data.sortMode = workspace.sortMode;
+    }
+
+    // Sidebar state
+    if (selected.sidebarOpen) {
+        data.sidebarOpen = workspace.sidebarOpen;
+    }
+
+    // Usage statistics
+    if (selected.usage) {
+        try {
+            const u = localStorage.getItem(USAGE_KEY);
+            if (u) data.usage = JSON.parse(u);
+        } catch { }
+    }
+
+    // Timer preferences
+    if (selected.timerPrefs) {
+        data.timerPrefs = { ...timerOptions };
+    }
+
+    // Toolbar collapsed state
+    if (selected.toolbarCollapsed) {
+        try {
+            const tc = localStorage.getItem(COLLAPSE_KEY);
+            if (tc !== null) data.toolbarCollapsed = tc === '1';
+        } catch { }
+    }
+
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1893,7 +1973,9 @@ document.getElementById('btn-export-ws').addEventListener('click', () => {
     a.download = `rawer-workspace-${ts}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Đã xuất workspace');
+
+    const count = Object.values(selected).filter(v => v).length;
+    showToast(`Đã xuất ${count} mục cài đặt`);
 });
 
 const importWsInput = document.getElementById('import-ws-input');
@@ -1908,40 +1990,86 @@ importWsInput.addEventListener('change', () => {
     reader.onload = (evt) => {
         try {
             const data = JSON.parse(evt.target.result);
-            if (!data.tree || !data.files) throw new Error('Invalid format');
 
-            pushSidebarUndo();
-            workspace.tree = data.tree;
-            workspace.files = data.files;
-            workspace.activeFileId = data.activeFileId || null;
-            if (data.sortMode) workspace.sortMode = data.sortMode;
+            // Workspace data (backward compatible: v1 always has tree+files)
+            if (data.tree && data.files) {
+                pushSidebarUndo();
+                workspace.tree = data.tree;
+                workspace.files = data.files;
+                workspace.activeFileId = data.activeFileId || null;
 
-            const allFileIds = getAllFileIds(workspace.tree);
-            if (workspace.activeFileId && !allFileIds.includes(workspace.activeFileId)) {
-                workspace.activeFileId = allFileIds[0] || null;
+                const allFileIds = getAllFileIds(workspace.tree);
+                if (workspace.activeFileId && !allFileIds.includes(workspace.activeFileId)) {
+                    workspace.activeFileId = allFileIds[0] || null;
+                }
+                if (!workspace.activeFileId && allFileIds.length > 0) {
+                    workspace.activeFileId = allFileIds[0];
+                }
+
+                editor.value = workspace.activeFileId ? (workspace.files[workspace.activeFileId] || '') : '';
+                undoStack.length = 0;
+                redoStack.length = 0;
+                lastSavedText = editor.value;
+                lastSavedStart = 0;
+                lastSavedEnd = 0;
+                updateUndoRedoButtons();
+                fileStacks.clear();
+                selectedIds.clear();
+                lastClickedId = null;
+            } else if (data.version >= 2) {
+                // v2 export without workspace data — just settings
+            } else {
+                throw new Error('Invalid format');
             }
-            if (!workspace.activeFileId && allFileIds.length > 0) {
-                workspace.activeFileId = allFileIds[0];
+
+            // Sort mode
+            if (data.sortMode) {
+                workspace.sortMode = data.sortMode;
             }
-
-            editor.value = workspace.activeFileId ? (workspace.files[workspace.activeFileId] || '') : '';
-            undoStack.length = 0;
-            redoStack.length = 0;
-            lastSavedText = editor.value;
-            lastSavedStart = 0;
-            lastSavedEnd = 0;
-            updateUndoRedoButtons();
-            fileStacks.clear();
-            selectedIds.clear();
-            lastClickedId = null;
-
             btnSort.title = `Sắp xếp: ${SORT_LABELS[workspace.sortMode]}`;
             btnSort.classList.toggle('active', workspace.sortMode !== 'manual');
+
+            // Sidebar state
+            if (data.sidebarOpen !== undefined) {
+                workspace.sidebarOpen = data.sidebarOpen;
+                if (workspace.sidebarOpen && !isMobile()) {
+                    sidebarEl.classList.remove('hidden');
+                } else if (!workspace.sidebarOpen) {
+                    sidebarEl.classList.add('hidden');
+                }
+            }
+
+            // Usage statistics
+            if (data.usage) {
+                try {
+                    usageData = data.usage;
+                    saveUsage();
+                } catch { }
+            }
+
+            // Timer preferences
+            if (data.timerPrefs) {
+                Object.assign(timerOptions, data.timerPrefs);
+                saveTimerPrefs();
+            }
+
+            // Toolbar collapsed state
+            if (data.toolbarCollapsed !== undefined) {
+                setToolbarCollapsed(data.toolbarCollapsed);
+            }
 
             saveWorkspace();
             renderTree();
             update();
-            showToast(`Đã nhập workspace (${allFileIds.length} file)`);
+
+            const parts = [];
+            if (data.tree) parts.push(`${getAllFileIds(workspace.tree).length} file`);
+            if (data.sortMode) parts.push('sắp xếp');
+            if (data.sidebarOpen !== undefined) parts.push('sidebar');
+            if (data.usage) parts.push('thống kê');
+            if (data.timerPrefs) parts.push('hẹn giờ');
+            if (data.toolbarCollapsed !== undefined) parts.push('toolbar');
+            showToast(`Đã nhập: ${parts.join(', ')}`);
         } catch (err) {
             showToast('Lỗi: File không đúng định dạng workspace');
         }
