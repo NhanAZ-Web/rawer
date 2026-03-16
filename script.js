@@ -978,26 +978,21 @@ function createFile(nearId) {
     pushSidebarUndo();
     const id = generateId();
     const now = Date.now();
-    const defaultName = 'Văn bản mới';
-    const newNode = { id, type: 'file', name: defaultName, createdAt: now, modifiedAt: now };
+    const newNode = { id, type: 'file', name: '', createdAt: now, modifiedAt: now };
     workspace.files[id] = '';
 
     if (nearId) {
         const node = findNodeById(nearId, workspace.tree);
         if (node && node.type === 'folder') {
             if (!node.children) node.children = [];
-            newNode.name = ensureUniqueName(defaultName, node.children, id);
             node.children.push(newNode);
             node.expanded = true;
         } else {
             const parent = findParentArray(nearId, workspace.tree);
-            const siblings = parent ? parent.arr : workspace.tree;
-            newNode.name = ensureUniqueName(defaultName, siblings, id);
             if (parent) parent.arr.splice(parent.idx + 1, 0, newNode);
             else workspace.tree.push(newNode);
         }
     } else {
-        newNode.name = ensureUniqueName(defaultName, workspace.tree, id);
         workspace.tree.push(newNode);
     }
 
@@ -1526,6 +1521,7 @@ function updateSpaceHighlights() {
     spaceLayer.innerHTML = html;
 }
 
+let treeNameTimer = null;
 // ── Paste ─────────────────────────────────────
 editor.addEventListener('paste', (e) => {
     e.preventDefault();
@@ -1543,10 +1539,14 @@ editor.addEventListener('paste', (e) => {
     lastSavedEnd = newPos;
     update();
     findAllMatches();
+    const activeNode = findNodeById(workspace.activeFileId, workspace.tree);
+    if (activeNode && !activeNode.name) {
+        clearTimeout(treeNameTimer);
+        treeNameTimer = setTimeout(() => renderTree(), 500);
+    }
 });
 
 // ── Input ─────────────────────────────────────
-let treeNameTimer = null;
 function ensureActiveFile() {
     if (workspace.activeFileId) return;
     const id = generateId();
